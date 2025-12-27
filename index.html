@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J_VAPES.KE | Premium Disposables</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            black: '#0a0a0a',
+                            gray: '#f5f5f5',
+                            accent: '#25D366', // WhatsApp Green
+                            sale: '#ef4444'    // Sale Red
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .fade-enter { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-white text-brand-black antialiased selection:bg-brand-black selection:text-white">
+
+    <div id="age-gate" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-8 text-center">
+        <div class="max-w-md w-full">
+            <h1 class="text-5xl font-black tracking-tighter mb-2">18+</h1>
+            <h2 class="text-xl font-bold uppercase tracking-widest mb-6">Age Verification Required</h2>
+            <p class="text-gray-500 mb-8 text-sm leading-relaxed">
+                You must be of legal smoking age (18+) to enter J_VAPES.KE. 
+                Products contain nicotine, an addictive chemical.
+            </p>
+            <div class="grid grid-cols-2 gap-4">
+                <button id="btn-no" class="border border-gray-200 py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-50 transition">Exit</button>
+                <button id="btn-yes" class="bg-brand-black text-white py-4 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition">I am 18+</button>
+            </div>
+            <p id="age-error" class="text-red-500 text-xs mt-4 hidden font-bold uppercase tracking-widest">Access Denied</p>
+        </div>
+    </div>
+
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="text-xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">
+                J_VAPES<span class="text-gray-300">.KE</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <button onclick="window.app.toggleCart()" class="relative group">
+                    <span class="text-xs font-bold uppercase tracking-widest group-hover:text-gray-500 transition">Bag</span>
+                    <span id="cart-count" class="absolute -top-1 -right-2 w-4 h-4 bg-brand-accent text-[10px] text-white rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="app-container" class="pt-20 pb-24 min-h-screen flex flex-col max-w-7xl mx-auto">
+        <header class="px-6 mb-8 fade-enter">
+            <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-6">INVENTORY.</h1>
+            <div class="sticky top-20 bg-white/95 backdrop-blur z-40 py-4 -mx-6 px-6 border-b border-gray-100">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="relative flex-1">
+                        <input type="text" id="search" placeholder="Search brands, flavors..." oninput="window.app.handleSearch(this.value)" class="w-full bg-brand-gray border-none rounded-none py-3 px-4 text-sm font-bold uppercase placeholder:text-gray-400 focus:ring-1 focus:ring-black transition">
+                    </div>
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                        <select id="filter-brand" onchange="window.app.handleFilter()" class="bg-white border border-gray-200 py-3 px-4 text-xs font-bold uppercase tracking-wide cursor-pointer focus:border-black outline-none min-w-[120px]">
+                            <option value="all">Brand: All</option>
+                        </select>
+                        <select id="filter-puffs" onchange="window.app.handleFilter()" class="bg-white border border-gray-200 py-3 px-4 text-xs font-bold uppercase tracking-wide cursor-pointer focus:border-black outline-none min-w-[120px]">
+                            <option value="all">Puffs: All</option>
+                        </select>
+                        <select id="filter-price" onchange="window.app.handleFilter()" class="bg-white border border-gray-200 py-3 px-4 text-xs font-bold uppercase tracking-wide cursor-pointer focus:border-black outline-none min-w-[120px]">
+                            <option value="all">Price: All</option>
+                            <option value="low">Under 1,500</option>
+                            <option value="mid">1,500 - 2,500</option>
+                            <option value="high">Above 2,500</option>
+                            <option value="sale">On Sale Only</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main id="product-grid" class="px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12 fade-enter">
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Loading Store...</p>
+        </main>
+        
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-gray-400">
+            <p class="uppercase text-xs tracking-widest font-bold">No Products Found</p>
+            <button onclick="window.app.resetFilters()" class="mt-4 text-black underline text-xs font-bold uppercase">Clear Filters</button>
+        </div>
+    </div>
+
+    <div id="cart-overlay" onclick="window.app.toggleCart()" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60] hidden transition-opacity opacity-0"></div>
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 w-full md:w-[480px] bg-white z-[70] transform translate-x-full transition-transform duration-500 shadow-2xl flex flex-col">
+        <div class="p-8 border-b border-gray-100 flex justify-between items-center">
+            <h2 class="text-3xl font-black tracking-tighter">BAG</h2>
+            <button onclick="window.app.toggleCart()" class="text-gray-400 hover:text-black transition text-sm font-bold uppercase">Close</button>
+        </div>
+        <div id="cart-items" class="flex-1 overflow-y-auto p-8 space-y-8"></div>
+        <div class="p-8 bg-brand-gray border-t border-gray-200">
+            <div class="flex justify-between items-end mb-6">
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Total Estimate</span>
+                <span id="cart-total" class="text-2xl font-black tracking-tighter">KES 0</span>
+            </div>
+            <button onclick="window.app.checkout()" class="w-full bg-brand-accent text-white py-5 uppercase text-xs font-bold tracking-[0.2em] hover:bg-[#20bd5a] transition flex items-center justify-center gap-3">Checkout WhatsApp</button>
+        </div>
+    </div>
+
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+                <h2 class="text-2xl font-black tracking-tighter mb-4">J_VAPES<span class="text-gray-600">.KE</span></h2>
+                <div class="text-[10px] uppercase tracking-widest text-gray-500 space-y-2">
+                    <p>Nairobi, Kenya</p>
+                    <p>Strictly 18+ Legal Age</p>
+                </div>
+            </div>
+            <div class="md:text-right">
+                <p class="text-[10px] text-gray-600 border-l-2 md:border-l-0 md:border-r-2 border-gray-800 pl-4 md:pl-0 md:pr-4 leading-relaxed max-w-xs md:ml-auto">
+                    WARNING: These products contain nicotine. Nicotine is an addictive chemical.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-black text-white px-8 py-4 text-xs font-bold uppercase tracking-widest shadow-2xl z-[90] opacity-0 pointer-events-none transition-all duration-300">
+        Item Added
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
