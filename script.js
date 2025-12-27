@@ -6,12 +6,12 @@ const app = {
     sanity: null,
     
     filter: { search: '', brand: 'all', puffs: 'all', price: 'all' },
-    config: { phone: '254741658556' }, // YOUR PHONE NUMBER
+    // NOTE: WhatsApp requires international format (254...) without the '+'
+    config: { phone: '254741658556' }, 
 
-    // ===== 1. INIT (THE ENGINE) =====
+    // ===== 1. INIT =====
     async init() {
         console.log("🚀 App Starting...");
-        
         try {
             this.sanity = createClient({
                 projectId: 'l1760iss',
@@ -20,7 +20,6 @@ const app = {
                 apiVersion: '2023-01-01'
             });
 
-            // Fetch Data
             const query = `*[_type == "disposable"]{
                 "id": _id,
                 name,
@@ -32,8 +31,7 @@ const app = {
             }`;
 
             const result = await this.sanity.fetch(query);
-            console.log("☁️ Inventory Loaded:", result.length, "items");
-            
+            console.log("☁️ Data Received:", result.length);
             this.data = result;
             this.populateDropdowns();
             this.renderStore();
@@ -41,11 +39,11 @@ const app = {
         } catch (err) {
             console.error("❌ Error:", err);
             document.getElementById('product-grid').innerHTML = 
-                `<p class="text-red-500 text-xs font-bold uppercase">System Offline. Check Console.</p>`;
+                `<p class="text-red-500 text-xs font-bold uppercase">System Offline. Check Connection.</p>`;
         }
     },
 
-    // ===== 2. RENDER STORE (THE LOOK) =====
+    // ===== 2. RENDER STORE =====
     renderStore() {
         const grid = document.getElementById('product-grid');
         const empty = document.getElementById('empty-state');
@@ -55,7 +53,6 @@ const app = {
             const matchSearch = (p.name + p.brand).toLowerCase().includes(this.filter.search.toLowerCase());
             const matchBrand = this.filter.brand === 'all' || p.brand === this.filter.brand;
             const matchPuffs = this.filter.puffs === 'all' || p.puffs === this.filter.puffs;
-            
             const finalPrice = p.discount ? Math.round(p.price * (1 - p.discount/100)) : p.price;
             
             let matchPrice = true;
@@ -69,10 +66,7 @@ const app = {
 
         if (filtered.length === 0) {
             grid.innerHTML = '';
-            if(empty) {
-                empty.classList.remove('hidden');
-                empty.classList.add('flex');
-            }
+            if(empty) { empty.classList.remove('hidden'); empty.classList.add('flex'); }
             return;
         }
 
@@ -84,19 +78,19 @@ const app = {
             
             return `
             <div class="group relative cursor-pointer fade-enter">
-                <div class="aspect-[4/5] bg-brand-gray overflow-hidden mb-4 relative">
+                <div class="aspect-[4/5] bg-brand-gray overflow-hidden mb-4 relative rounded-sm">
                     <img src="${p.img || 'https://via.placeholder.com/400x500?text=No+Image'}" 
                          class="w-full h-full object-cover mix-blend-multiply transition duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0">
                     <div class="absolute top-2 left-2 flex flex-col items-start gap-1">
-                        <span class="bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm">${p.brand}</span>
+                        <span class="bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm border border-gray-100">${p.brand}</span>
                         <span class="bg-black text-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm">${p.puffs} PUFFS</span>
                     </div>
                     ${hasDiscount ? `<div class="absolute top-2 right-2 bg-brand-sale text-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm">-${p.discount}%</div>` : ''}
-                    <button onclick="window.app.addToCart('${p.id}')" class="absolute bottom-0 right-0 w-12 h-12 bg-black text-white flex items-center justify-center translate-y-full group-hover:translate-y-0 transition duration-300 z-10">
-                        <span class="text-xl">+</span>
+                    <button onclick="window.app.addToCart('${p.id}')" class="absolute bottom-0 right-0 w-12 h-12 bg-black text-white flex items-center justify-center translate-y-full group-hover:translate-y-0 transition duration-300 z-10 hover:bg-gray-800">
+                        <i class="fa-solid fa-plus text-xl"></i>
                     </button>
                 </div>
-                <h3 class="text-sm font-bold uppercase tracking-wider truncate">${p.name}</h3>
+                <h3 class="text-sm font-bold uppercase tracking-wider truncate mt-3">${p.name}</h3>
                 <div class="flex items-center gap-2 mt-1">
                     <p class="text-xs ${hasDiscount ? 'text-brand-sale' : 'text-gray-500'} font-bold">KES ${finalPrice.toLocaleString()}</p>
                     ${hasDiscount ? `<p class="text-[10px] text-gray-400 font-bold line-through">KES ${p.price.toLocaleString()}</p>` : ''}
@@ -109,23 +103,18 @@ const app = {
     populateDropdowns() {
         const brands = [...new Set(this.data.map(i => i.brand))].sort();
         const puffs = [...new Set(this.data.map(i => i.puffs))].sort((a,b) => parseInt(a)-parseInt(b));
-        
         const bSel = document.getElementById('filter-brand');
         const pSel = document.getElementById('filter-puffs');
-        
         if(bSel) bSel.innerHTML = '<option value="all">Brand: All</option>' + brands.map(b => `<option value="${b}">${b}</option>`).join('');
         if(pSel) pSel.innerHTML = '<option value="all">Puffs: All</option>' + puffs.map(p => `<option value="${p}">${p}</option>`).join('');
     },
-
     handleSearch(val) { this.filter.search = val; this.renderStore(); },
-    
     handleFilter() {
         this.filter.brand = document.getElementById('filter-brand').value;
         this.filter.puffs = document.getElementById('filter-puffs').value;
         this.filter.price = document.getElementById('filter-price').value;
         this.renderStore();
     },
-
     resetFilters() {
         document.getElementById('search').value = '';
         document.getElementById('filter-brand').value = 'all';
@@ -135,7 +124,7 @@ const app = {
         this.renderStore();
     },
 
-    // ===== 4. CART SYSTEM (THE MONEY) =====
+    // ===== 4. CART & CHECKOUT =====
     addToCart(id) {
         const item = this.data.find(i => i.id === id);
         const existing = this.cart.find(i => i.id === id);
@@ -143,15 +132,10 @@ const app = {
         else this.cart.push({ ...item, qty: 1 });
         this.renderCart();
         this.toast(`Added ${item.name}`);
-        
-        // Auto-open cart on add
+        // Auto open cart
         const drawer = document.getElementById('cart-drawer');
-        const overlay = document.getElementById('cart-overlay');
-        if (drawer && drawer.classList.contains('translate-x-full')) {
-            this.toggleCart();
-        }
+        if (drawer && drawer.classList.contains('translate-x-full')) this.toggleCart();
     },
-
     updateQty(id, delta) {
         const idx = this.cart.findIndex(i => i.id === id);
         if (idx === -1) return;
@@ -159,7 +143,6 @@ const app = {
         if (this.cart[idx].qty <= 0) this.cart.splice(idx, 1);
         this.renderCart();
     },
-
     renderCart() {
         const list = document.getElementById('cart-items');
         const totalEl = document.getElementById('cart-total');
@@ -183,7 +166,7 @@ const app = {
             total += finalPrice * i.qty;
             return `
             <div class="flex gap-4">
-                <img src="${i.img}" class="w-16 h-20 object-cover bg-brand-gray mix-blend-multiply">
+                <img src="${i.img}" class="w-16 h-20 object-cover bg-brand-gray mix-blend-multiply rounded-sm">
                 <div class="flex-1 flex flex-col justify-between py-1">
                     <div>
                         <h4 class="text-xs font-bold uppercase tracking-wider">${i.name}</h4>
@@ -202,7 +185,6 @@ const app = {
         }).join('');
         if(totalEl) totalEl.innerText = `KES ${total.toLocaleString()}`;
     },
-
     toggleCart() {
         const overlay = document.getElementById('cart-overlay');
         const drawer = document.getElementById('cart-drawer');
@@ -217,7 +199,6 @@ const app = {
             setTimeout(() => overlay.classList.add('hidden'), 300);
         }
     },
-
     checkout() {
         if(this.cart.length === 0) return;
         let msg = "ORDER REQUEST - J_VAPES.KE\n------------------------\n";
@@ -228,8 +209,22 @@ const app = {
             total += sub;
             msg += `• ${i.qty}x ${i.brand} ${i.name} (${i.puffs}) - KES ${sub.toLocaleString()}\n`;
         });
-        msg += `------------------------\nTOTAL: KES ${total.toLocaleString()}\n\nLocation: `;
+        msg += `------------------------\nTOTAL: KES ${total.toLocaleString()}\n\nPAYMENT: M-Pesa / Cash on Delivery\nLOCATION: `;
         window.open(`https://wa.me/${this.config.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    },
+
+    // ===== 5. MODAL HELPERS =====
+    toggleTerms() {
+        const m = document.getElementById('terms-modal');
+        if(m) m.classList.toggle('hidden');
+    },
+    toggleFAQ() {
+        const m = document.getElementById('faq-modal');
+        if(m) m.classList.toggle('hidden');
+    },
+    toggleContact() {
+        const m = document.getElementById('contact-modal');
+        if(m) m.classList.toggle('hidden');
     },
 
     toast(msg) {
@@ -245,28 +240,26 @@ const app = {
     }
 };
 
-// ===== 5. EXPOSE TO WINDOW =====
+// EXPOSE TO WINDOW
 window.app = app;
 
-// ===== 6. AGE GATE LOGIC =====
+// ===== 6. AGE GATE =====
 function setupAgeGate() {
     const ageGate = document.getElementById('age-gate');
     const ageError = document.getElementById('age-error');
     const btnYes = document.getElementById('btn-yes');
     const btnNo = document.getElementById('btn-no');
 
-    // 1. Check Memory
     if (localStorage.getItem('age_verified') === 'true') {
         if(ageGate) ageGate.classList.add('hidden');
         app.init(); 
         return;
     }
 
-    // 2. Buttons
     if (btnYes) {
         btnYes.addEventListener('click', () => {
             if(ageGate) ageGate.classList.add('hidden');
-            localStorage.setItem('age_verified', 'true'); // REMEMBERS YOU
+            localStorage.setItem('age_verified', 'true');
             app.init(); 
         });
     }
