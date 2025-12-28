@@ -2,9 +2,9 @@ import { createClient } from 'https://esm.sh/@sanity/client'
 
 // 1. CONFIGURATION
 const client = createClient({
-    projectId: '2aveaa71', // Your Project ID
+    projectId: '2aveaa71', 
     dataset: 'production',
-    useCdn: true,
+    useCdn: true, // MUST be true for fast images
     apiVersion: '2023-01-01'
 })
 
@@ -13,13 +13,11 @@ window.app = {
     products: [],
     cart: [],
     
-    // --- INITIALIZATION ---
     async init() {
         await this.fetchProducts();
         this.loadCart();
     },
 
-    // --- FETCH DATA (Updated for Flavors & Nicotine) ---
     async fetchProducts() {
         const query = `*[_type == "disposable"] {
             _id,
@@ -42,7 +40,6 @@ window.app = {
         }
     },
 
-    // --- RENDER GRID ---
     renderProducts(items) {
         const grid = document.getElementById('product-grid');
         const empty = document.getElementById('empty-state');
@@ -57,11 +54,15 @@ window.app = {
         empty.classList.replace('flex', 'hidden');
 
         grid.innerHTML = items.map(product => {
-            // Calculate Logic
             const onSale = product.discount > 0;
             const finalPrice = onSale ? Math.round(product.price * ((100 - product.discount) / 100)) : product.price;
             
-            // Build Flavor Dropdown HTML
+            // --- NEW: SPEED OPTIMIZATION ---
+            // This requests a smaller, web-ready version of your photo
+            const optimizedImage = product.imageUrl 
+                ? product.imageUrl + '?w=600&h=600&fit=crop&auto=format&q=80' 
+                : 'https://placehold.co/400x400?text=No+Image';
+
             let flavorHtml = '';
             if (product.flavors && product.flavors.length > 0) {
                 const options = product.flavors.map(f => `<option value="${f}">${f}</option>`).join('');
@@ -80,7 +81,8 @@ window.app = {
             return `
             <div class="group relative fade-enter">
                 <div class="aspect-square bg-brand-gray overflow-hidden relative mb-4">
-                    <img src="${product.imageUrl || 'https://placehold.co/400x400?text=No+Image'}" 
+                    <img src="${optimizedImage}" 
+                         loading="lazy"
                          class="w-full h-full object-cover object-center group-hover:scale-105 transition duration-500"
                          alt="${product.name}">
                     
@@ -113,19 +115,16 @@ window.app = {
         }).join('');
     },
 
-    // --- CART FUNCTIONS ---
     addToCart(id) {
         const product = this.products.find(p => p._id === id);
         if (!product) return;
 
-        // Get Selected Flavor
         let selectedFlavor = 'Default';
         const flavorSelect = document.getElementById(`flavor-${id}`);
         if (flavorSelect) {
             selectedFlavor = flavorSelect.value;
         }
 
-        // Create Unique ID based on Product + Flavor
         const cartItemId = `${id}-${selectedFlavor}`;
         const existingItem = this.cart.find(item => item.cartId === cartItemId);
 
@@ -135,16 +134,21 @@ window.app = {
             const finalPrice = product.discount > 0 
                 ? Math.round(product.price * ((100 - product.discount) / 100)) 
                 : product.price;
+            
+            // Use small thumbnail for cart
+            const cartImage = product.imageUrl 
+                ? product.imageUrl + '?w=100&h=100&fit=crop&auto=format'
+                : 'https://placehold.co/100x100';
 
             this.cart.push({
                 cartId: cartItemId,
                 productId: product._id,
                 name: product.name,
                 brand: product.brand,
-                flavor: selectedFlavor, // Save the flavor
+                flavor: selectedFlavor,
                 price: finalPrice,
                 qty: 1,
-                image: product.imageUrl
+                image: cartImage 
             });
         }
 
@@ -162,16 +166,13 @@ window.app = {
         const countBadge = document.getElementById('cart-count');
         const totalEl = document.getElementById('cart-total');
         
-        // Update Count
         const totalQty = this.cart.reduce((sum, item) => sum + item.qty, 0);
         countBadge.innerText = totalQty;
         countBadge.classList.toggle('hidden', totalQty === 0);
 
-        // Update Total
         const totalPrice = this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
         totalEl.innerText = `KES ${totalPrice.toLocaleString()}`;
 
-        // Render Items
         if (this.cart.length === 0) {
             cartContainer.innerHTML = '<p class="text-center text-gray-400 text-xs uppercase tracking-widest mt-10">Your bag is empty</p>';
             return;
@@ -204,7 +205,6 @@ window.app = {
         this.saveCart();
     },
 
-    // --- UI HELPERS ---
     toggleCart() {
         const drawer = document.getElementById('cart-drawer');
         const overlay = document.getElementById('cart-overlay');
@@ -223,17 +223,9 @@ window.app = {
         }
     },
 
-    toggleContact() {
-        document.getElementById('contact-modal').classList.toggle('hidden');
-    },
-
-    toggleFAQ() {
-        document.getElementById('faq-modal').classList.toggle('hidden');
-    },
-
-    toggleTerms() {
-        document.getElementById('terms-modal').classList.toggle('hidden');
-    },
+    toggleContact() { document.getElementById('contact-modal').classList.toggle('hidden'); },
+    toggleFAQ() { document.getElementById('faq-modal').classList.toggle('hidden'); },
+    toggleTerms() { document.getElementById('terms-modal').classList.toggle('hidden'); },
 
     handleSearch(query) {
         const lower = query.toLowerCase();
@@ -247,15 +239,10 @@ window.app = {
 
     handleFilter() {
         const brand = document.getElementById('filter-brand').value;
-        const puff = document.getElementById('filter-puffs').value;
         const price = document.getElementById('filter-price').value;
-
         let filtered = this.products;
 
         if (brand !== 'all') filtered = filtered.filter(p => p.brand === brand);
-        // Add more logic if needed
-        
-        // Simple price filter
         if (price === 'low') filtered = filtered.filter(p => p.price < 1500);
         if (price === 'mid') filtered = filtered.filter(p => p.price >= 1500 && p.price <= 2500);
         if (price === 'high') filtered = filtered.filter(p => p.price > 2500);
@@ -281,10 +268,7 @@ window.app = {
         }, 2000);
     },
 
-    saveCart() {
-        localStorage.setItem('jvapes_cart', JSON.stringify(this.cart));
-    },
-
+    saveCart() { localStorage.setItem('jvapes_cart', JSON.stringify(this.cart)); },
     loadCart() {
         const saved = localStorage.getItem('jvapes_cart');
         if (saved) {
@@ -295,39 +279,27 @@ window.app = {
 
     checkout() {
         if (this.cart.length === 0) return;
-
         let message = `*NEW ORDER - J_VAPES.KE*\n\n`;
         this.cart.forEach(item => {
             message += `▫️ ${item.name}\n   Flavor: ${item.flavor}\n   Qty: ${item.qty} x ${item.price}\n\n`;
         });
-
         const total = this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        message += `*TOTAL ESTIMATE: KES ${total.toLocaleString()}*\n`;
-        message += `--------------------------\n`;
-        message += `📍 Location: \n`;
-        message += `Delivery is approx 100-400 KES depending on location.`;
-
-        const url = `https://wa.me/254741658556?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
+        message += `*TOTAL ESTIMATE: KES ${total.toLocaleString()}*\n--------------------------\n📍 Location: \nDelivery is approx 100-400 KES depending on location.`;
+        window.open(`https://wa.me/254741658556?text=${encodeURIComponent(message)}`, '_blank');
     }
 };
 
-// Start
 document.addEventListener('DOMContentLoaded', () => {
     window.app.init();
-    
-    // Age Gate Logic
     if (!localStorage.getItem('age_verified')) {
         document.getElementById('age-gate').classList.remove('hidden');
     } else {
         document.getElementById('age-gate').classList.add('hidden');
     }
-
     document.getElementById('btn-yes').addEventListener('click', () => {
         localStorage.setItem('age_verified', 'true');
         document.getElementById('age-gate').classList.add('hidden');
     });
-
     document.getElementById('btn-no').addEventListener('click', () => {
         document.getElementById('age-error').classList.remove('hidden');
     });
