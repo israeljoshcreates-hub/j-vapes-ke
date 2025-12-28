@@ -20,8 +20,8 @@
                         brand: {
                             black: '#0a0a0a',
                             gray: '#f5f5f5',
-                            accent: '#25D366', // WhatsApp Green
-                            sale: '#ef4444'     // Sale Red
+                            accent: '#25D366',
+                            sale: '#ef4444'
                         }
                     }
                 }
@@ -35,10 +35,9 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .fade-enter { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .modal-open { overflow: hidden; }
     </style>
 </head>
-<body class="bg-white text-brand-black antialiased selection:bg-brand-black selection:text-white">
+<body class="bg-white text-brand-black antialiased">
 
     <div id="age-gate" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-8 text-center">
         <div class="max-w-md w-full">
@@ -84,12 +83,7 @@
     <div id="app-container" class="pt-8 pb-24 min-h-screen flex flex-col max-w-7xl mx-auto">
         <header class="px-6 mb-8 fade-enter">
             <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-2">INVENTORY.</h1>
-            
-            <p class="text-sm text-gray-400 font-medium mb-6 leading-relaxed">
-                Based in Ruiru, Kiambu<br>
-                Delivering Country Wide<br>
-                <span class="text-red-500">Strictly 18+ Legal Age</span>
-            </p>
+            <p class="text-sm text-gray-400 font-medium mb-6">Based in Ruiru, Delivering Nairobi Wide.</p>
             
             <div class="sticky top-16 bg-white/95 backdrop-blur z-40 py-4 -mx-6 px-6 border-b border-gray-100 shadow-sm">
                 <div class="flex flex-col md:flex-row gap-4">
@@ -166,10 +160,6 @@
                     <h3 class="font-bold uppercase mb-1">Can I pay after delivery?</h3>
                     <p class="text-gray-500">Yes! We offer <strong>Payment on Delivery (POD)</strong> via M-Pesa or Cash. You inspect the item, then you pay.</p>
                 </div>
-                <div>
-                    <h3 class="font-bold uppercase mb-1">How long does it take?</h3>
-                    <p class="text-gray-500">Instant delivery (30-90 mins) for Ruiru/Nairobi environs.</p>
-                </div>
             </div>
         </div>
     </div>
@@ -185,9 +175,6 @@
                 <a href="mailto:joshuavapeske@gmail.com" class="block bg-brand-gray py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-200 transition">
                     <i class="fa-solid fa-envelope mr-2"></i> Email Us
                 </a>
-                <a href="https://wa.me/254741658556" target="_blank" class="block bg-[#25D366] text-white py-4 text-sm font-bold uppercase tracking-widest hover:bg-green-600 transition">
-                    <i class="fa-brands fa-whatsapp mr-2"></i> Chat on WhatsApp
-                </a>
             </div>
         </div>
     </div>
@@ -198,16 +185,9 @@
             <h2 class="text-3xl font-black tracking-tighter mb-6 uppercase">Terms & Conditions</h2>
             <div class="text-xs text-gray-600 space-y-4 leading-relaxed uppercase font-medium">
                 <p><strong>1. STRICT AGE REQUIREMENT (18+ ONLY)</strong><br>
-                By accessing J_VAPES.KE, you represent that you are at least 18 years old. It is a criminal offense in Kenya to sell nicotine to minors. We reserve the right to request ID upon delivery.</p>
-                
-                <p><strong>2. PAYMENT & DELIVERY</strong><br>
-                We accept M-Pesa and Cash on Delivery. Delivery fees are calculated based on your location from Ruiru. Failed deliveries due to unavailability may incur a fee.</p>
-                
-                <p><strong>3. RETURNS</strong><br>
-                Due to hygiene, we DO NOT accept returns on opened vapes unless Dead-On-Arrival (reported within 24h).</p>
-                
-                <p><strong>4. PRIVACY</strong><br>
-                Your data is handled according to the Kenya Data Protection Act (2019).</p>
+                By accessing J_VAPES.KE, you represent that you are at least 18 years old. It is a criminal offense in Kenya to sell nicotine to minors.</p>
+                <p><strong>2. RETURNS</strong><br>
+                Due to hygiene, we DO NOT accept returns on opened vapes unless Dead-On-Arrival.</p>
             </div>
         </div>
     </div>
