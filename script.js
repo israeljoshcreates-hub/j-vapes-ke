@@ -33,7 +33,6 @@ window.app = {
         
         try {
             this.products = await client.fetch(query);
-            // --- NEW: Auto-fill BOTH filters ---
             this.populateFilters(); 
             this.renderProducts(this.products);
         } catch (err) {
@@ -44,7 +43,6 @@ window.app = {
 
     // --- POPULATE DROPDOWNS AUTOMATICALLY ---
     populateFilters() {
-        // 1. Setup Brands
         const brandSelect = document.getElementById('filter-brand');
         if (brandSelect) {
             const brands = [...new Set(this.products.map(p => p.brand))].sort();
@@ -54,7 +52,6 @@ window.app = {
             });
         }
 
-        // 2. Setup Puff Counts (Sorted by number)
         const puffSelect = document.getElementById('filter-puffs');
         if (puffSelect) {
             const puffs = [...new Set(this.products.map(p => p.puffCount))].sort((a, b) => a - b);
@@ -140,7 +137,7 @@ window.app = {
         }).join('');
     },
 
-    // --- FILTER LOGIC (UPDATED) ---
+    // --- FILTER LOGIC ---
     handleFilter() {
         const brandSelect = document.getElementById('filter-brand');
         const puffSelect = document.getElementById('filter-puffs');
@@ -152,17 +149,8 @@ window.app = {
 
         let filtered = this.products;
 
-        // 1. Filter Brand
-        if (brand !== 'all') {
-            filtered = filtered.filter(p => p.brand === brand);
-        }
-
-        // 2. Filter Puffs (Convert string to number for comparison)
-        if (puff !== 'all') {
-            filtered = filtered.filter(p => p.puffCount == puff);
-        }
-
-        // 3. Filter Price
+        if (brand !== 'all') filtered = filtered.filter(p => p.brand === brand);
+        if (puff !== 'all') filtered = filtered.filter(p => p.puffCount == puff);
         if (price === 'low') filtered = filtered.filter(p => p.price < 1500);
         if (price === 'mid') filtered = filtered.filter(p => p.price >= 1500 && p.price <= 2500);
         if (price === 'high') filtered = filtered.filter(p => p.price > 2500);
@@ -242,6 +230,9 @@ window.app = {
     },
 
     updateCartUI() {
+        // --- FIX IS HERE: SAVE FIRST! ---
+        this.saveCart();
+
         const cartContainer = document.getElementById('cart-items');
         const countBadge = document.getElementById('cart-count');
         const totalEl = document.getElementById('cart-total');
@@ -285,8 +276,6 @@ window.app = {
                 </div>
             </div>
         `).join('');
-
-        this.saveCart();
     },
 
     toggleCart() {
@@ -346,7 +335,7 @@ window.app = {
 document.addEventListener('DOMContentLoaded', () => {
     window.app.init();
     
-    // Listeners for filters (redundancy for safety)
+    // Listeners for filters
     document.getElementById('filter-brand')?.addEventListener('change', () => window.app.handleFilter());
     document.getElementById('filter-puffs')?.addEventListener('change', () => window.app.handleFilter());
     document.getElementById('filter-price')?.addEventListener('change', () => window.app.handleFilter());
