@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J_VAPES.KE | Premium Disposables | Ruiru & Nairobi</title>
     
+    <title>J_VAPES.KE | Premium Disposables | Ruiru & Nairobi</title>
+    <meta name="description" content="Shop the best disposable vapes in Kenya. Elf Bar, Voopoo, Lost Mary. Instant delivery via WhatsApp. Best prices guaranteed.">
+    <meta name="keywords" content="vape kenya, disposable vapes nairobi, elf bar, vape shop, electronic cigarettes, quit smoking kenya">
+    <meta name="robots" content="index, follow">
+
     <link rel="icon" href="favicon.png" type="image/png">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -35,9 +39,47 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .fade-enter { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-open { overflow: hidden; }
     </style>
 </head>
 <body class="bg-white text-brand-black antialiased">
+
+    <div id="sidebar-drawer" class="fixed inset-y-0 left-0 w-80 bg-brand-black text-white transform -translate-x-full transition-transform duration-300 z-[80] p-6 overflow-y-auto">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-2xl font-black uppercase tracking-tighter">Menu</h2>
+            <button onclick="window.app.toggleSidebar()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button>
+        </div>
+
+        <nav class="space-y-6">
+            <a href="#" onclick="window.app.toggleSidebar()" class="block text-sm font-bold uppercase tracking-widest hover:text-gray-400 transition">Home</a>
+            
+            <div class="border-t border-gray-800 pt-6">
+                <p class="text-xs text-gray-500 font-bold uppercase mb-4 tracking-widest">Information</p>
+                
+                <button onclick="window.app.openModal('guides-modal')" class="flex items-center gap-3 text-sm text-gray-300 hover:text-white w-full mb-4 text-left font-bold uppercase tracking-wide">
+                    <i class="fa-solid fa-book-open w-5"></i> Vape Guides
+                </button>
+                
+                <button onclick="window.app.openModal('legal-modal')" class="flex items-center gap-3 text-sm text-gray-300 hover:text-white w-full mb-4 text-left font-bold uppercase tracking-wide">
+                    <i class="fa-solid fa-scale-balanced w-5"></i> Legal Policy
+                </button>
+                
+                <button onclick="window.app.openModal('quit-modal')" class="flex items-center gap-3 text-sm text-green-500 font-bold uppercase w-full mt-6 text-left tracking-wide">
+                    <i class="fa-solid fa-leaf w-5"></i> Want to Quit?
+                </button>
+            </div>
+        </nav>
+
+        <div class="absolute bottom-8 left-6">
+            <p class="text-[10px] text-gray-500 font-bold uppercase mb-3">Follow Us</p>
+            <div class="flex gap-4">
+                <a href="#" class="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition text-white"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition text-white"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="https://wa.me/254741658556" class="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition text-white"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+        </div>
+    </div>
+    <div id="sidebar-overlay" onclick="window.app.toggleSidebar()" class="fixed inset-0 bg-black/80 z-[70] hidden backdrop-blur-sm transition-opacity"></div>
 
     <div id="age-gate" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-8 text-center">
         <div class="max-w-md w-full">
@@ -57,8 +99,12 @@
 
     <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md border-b border-gray-100 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="text-xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">
-                J_VAPES<span class="text-gray-300">.KE</span>
+            <div class="flex items-center gap-4">
+                <button onclick="window.app.toggleSidebar()" class="text-xl hover:text-gray-500 transition"><i class="fa-solid fa-bars"></i></button>
+                
+                <div class="text-xl font-black tracking-tighter cursor-pointer" onclick="location.reload()">
+                    J_VAPES<span class="text-gray-300">.KE</span>
+                </div>
             </div>
             <div class="flex items-center gap-6">
                 <button onclick="window.app.toggleContact()" class="text-gray-500 hover:text-black transition">
@@ -90,21 +136,7 @@
                     <div class="relative flex-1">
                         <input type="text" id="search" placeholder="Search brands, flavors..." oninput="window.app.handleSearch(this.value)" class="w-full bg-brand-gray border-none rounded-none py-3 px-4 text-sm font-bold uppercase placeholder:text-gray-400 focus:ring-1 focus:ring-black transition outline-none">
                     </div>
-                    <div class="flex gap-2 overflow-x-auto no-scrollbar">
-                        <select id="filter-brand" onchange="window.app.handleFilter()" class="bg-white border border-gray-200 py-3 px-4 text-xs font-bold uppercase tracking-wide cursor-pointer focus:border-black outline-none min-w-[120px]">
-                            <option value="all">Brand: All</option>
-                        </select>
-                        <select id="filter-puffs" onchange="window.app.handleFilter()" class="bg-white border border-gray-200 py-3 px-4 text-xs font-bold uppercase tracking-wide cursor-pointer focus:border-black outline-none min-w-[120px]">
-                            <option value="all">Puffs: All</option>
-                        </select>
-                        <select id="filter-price" onchange="window.app.handleFilter()" class="bg-white border border-gray-200 py-3 px-4 text-xs font-bold uppercase tracking-wide cursor-pointer focus:border-black outline-none min-w-[120px]">
-                            <option value="all">Price: All</option>
-                            <option value="low">Under 1,500</option>
-                            <option value="mid">1,500 - 2,500</option>
-                            <option value="high">Above 2,500</option>
-                            <option value="sale">On Sale Only</option>
-                        </select>
-                    </div>
+                    <div id="filter-brand-container" class="flex gap-2 overflow-x-auto no-scrollbar"></div>
                 </div>
             </div>
         </header>
@@ -136,10 +168,55 @@
                 <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Total Estimate</span>
                 <span id="cart-total" class="text-2xl font-black tracking-tighter">KES 0</span>
             </div>
+            <div id="discount-input-container" class="mb-4"></div>
+            
             <button onclick="window.app.checkout()" class="w-full bg-brand-black text-white py-5 uppercase text-xs font-bold tracking-[0.2em] hover:bg-gray-800 transition flex items-center justify-center gap-3">
                 Checkout via WhatsApp <i class="fa-brands fa-whatsapp"></i>
             </button>
             <p class="text-[10px] text-gray-400 text-center mt-3 uppercase tracking-wide">Pay via M-Pesa or Cash on Delivery</p>
+        </div>
+    </div>
+
+    <div id="legal-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full max-h-[80vh] overflow-y-auto p-8 shadow-2xl relative">
+            <button onclick="window.app.closeModal('legal-modal')" class="absolute top-4 right-4 text-xs font-bold uppercase tracking-widest hover:text-red-500">Close</button>
+            <h2 class="text-2xl font-black tracking-tighter mb-6 uppercase">Legal & Policy</h2>
+            <div class="space-y-4 text-sm text-gray-700">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="font-bold text-black mb-1 uppercase text-xs">🔞 Age Restriction</p>
+                    <p>You must be 18+ to purchase. We verify ID upon delivery.</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="font-bold text-black mb-1 uppercase text-xs">⚠️ Health Warning</p>
+                    <p>Products contain nicotine, an addictive chemical.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="guides-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full max-h-[80vh] overflow-y-auto p-8 shadow-2xl relative">
+            <button onclick="window.app.closeModal('guides-modal')" class="absolute top-4 right-4 text-xs font-bold uppercase tracking-widest hover:text-red-500">Close</button>
+            <h2 class="text-2xl font-black tracking-tighter mb-6 uppercase">Vape Guides</h2>
+            <div class="space-y-6">
+                <div>
+                    <p class="text-xs font-bold uppercase mb-2">How to verify Elf Bars</p>
+                    <div class="bg-black aspect-video flex items-center justify-center text-white text-4xl"><i class="fa-brands fa-youtube"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="quit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-md z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full p-8 shadow-2xl relative border-t-4 border-green-500">
+            <button onclick="window.app.closeModal('quit-modal')" class="absolute top-4 right-4 text-xs font-bold uppercase tracking-widest hover:text-red-500">Close</button>
+            <h2 class="text-2xl font-black tracking-tighter mb-6 uppercase text-green-600">Want to Quit?</h2>
+            <p class="text-sm text-gray-600 mb-4 font-medium">We support your journey to quit nicotine.</p>
+            <ul class="list-disc list-inside text-sm text-gray-600 space-y-2">
+                <li>Gradually reduce nicotine strength.</li>
+                <li>Set specific "vape-free" hours.</li>
+                <li>Consult a doctor for cessation advice.</li>
+            </ul>
         </div>
     </div>
 
@@ -148,18 +225,8 @@
             <button onclick="window.app.toggleFAQ()" class="absolute top-4 right-4 text-xs font-bold uppercase tracking-widest hover:text-red-500">Close</button>
             <h2 class="text-2xl font-black tracking-tighter mb-6">FAQ</h2>
             <div class="space-y-6 text-sm text-gray-700">
-                <div>
-                    <h3 class="font-bold uppercase mb-1">Where are you located?</h3>
-                    <p class="text-gray-500">We are an online store based in <strong class="text-black">Ruiru, Kiambu</strong>. We deliver to Ruiru, Thika Road, and Nairobi wide.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold uppercase mb-1">How much is delivery?</h3>
-                    <p class="text-gray-500">Fees depend on your location (Riders charge per KM). Typically between <strong>100 - 400 KES</strong>.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold uppercase mb-1">Can I pay after delivery?</h3>
-                    <p class="text-gray-500">Yes! We offer <strong>Payment on Delivery (POD)</strong> via M-Pesa or Cash. You inspect the item, then you pay.</p>
-                </div>
+                <div><h3 class="font-bold uppercase mb-1">Where are you located?</h3><p class="text-gray-500">Ruiru, Kiambu. Delivering Nairobi wide.</p></div>
+                <div><h3 class="font-bold uppercase mb-1">Delivery Fee?</h3><p class="text-gray-500">100 - 400 KES depending on location.</p></div>
             </div>
         </div>
     </div>
@@ -169,12 +236,8 @@
             <button onclick="window.app.toggleContact()" class="absolute top-4 right-4 text-xs font-bold uppercase tracking-widest hover:text-red-500">Close</button>
             <h2 class="text-2xl font-black tracking-tighter mb-6">GET IN TOUCH</h2>
             <div class="space-y-4">
-                <a href="tel:0741658556" class="block bg-brand-gray py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-200 transition">
-                    <i class="fa-solid fa-phone mr-2"></i> 0741 658 556
-                </a>
-                <a href="mailto:joshuavapeske@gmail.com" class="block bg-brand-gray py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-200 transition">
-                    <i class="fa-solid fa-envelope mr-2"></i> Email Us
-                </a>
+                <a href="tel:0741658556" class="block bg-brand-gray py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-200 transition"><i class="fa-solid fa-phone mr-2"></i> 0741 658 556</a>
+                <a href="mailto:joshuavapeske@gmail.com" class="block bg-brand-gray py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-200 transition"><i class="fa-solid fa-envelope mr-2"></i> Email Us</a>
             </div>
         </div>
     </div>
@@ -184,10 +247,8 @@
             <button onclick="window.app.toggleTerms()" class="absolute top-4 right-4 text-xs font-bold uppercase tracking-widest hover:text-red-500">Close</button>
             <h2 class="text-3xl font-black tracking-tighter mb-6 uppercase">Terms & Conditions</h2>
             <div class="text-xs text-gray-600 space-y-4 leading-relaxed uppercase font-medium">
-                <p><strong>1. STRICT AGE REQUIREMENT (18+ ONLY)</strong><br>
-                By accessing J_VAPES.KE, you represent that you are at least 18 years old. It is a criminal offense in Kenya to sell nicotine to minors.</p>
-                <p><strong>2. RETURNS</strong><br>
-                Due to hygiene, we DO NOT accept returns on opened vapes unless Dead-On-Arrival.</p>
+                <p><strong>1. STRICT AGE REQUIREMENT (18+ ONLY)</strong><br>By accessing J_VAPES.KE, you represent that you are at least 18 years old.</p>
+                <p><strong>2. RETURNS</strong><br>We DO NOT accept returns on opened vapes unless Dead-On-Arrival.</p>
             </div>
         </div>
     </div>
@@ -196,11 +257,7 @@
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
             <div>
                 <h2 class="text-2xl font-black tracking-tighter mb-4">J_VAPES<span class="text-gray-600">.KE</span></h2>
-                <div class="text-[10px] uppercase tracking-widest text-gray-500 space-y-2">
-                    <p>Based in Ruiru, Kiambu</p>
-                    <p>Delivering Country Wide</p>
-                    <p>Strictly 18+ Legal Age</p>
-                </div>
+                <div class="text-[10px] uppercase tracking-widest text-gray-500 space-y-2"><p>Based in Ruiru, Kiambu</p><p>Delivering Country Wide</p><p>Strictly 18+ Legal Age</p></div>
             </div>
             <div class="flex flex-col gap-2 text-xs font-bold uppercase tracking-widest text-gray-400">
                 <button onclick="window.app.toggleFAQ()" class="hover:text-white transition">FAQ / Delivery Info</button>
@@ -208,9 +265,7 @@
                 <button onclick="window.app.toggleTerms()" class="hover:text-white transition">Terms & Conditions</button>
             </div>
             <div class="md:text-right">
-                <p class="text-[10px] text-gray-600 border-l-2 md:border-l-0 md:border-r-2 border-gray-800 pl-4 md:pl-0 md:pr-4 leading-relaxed max-w-xs md:ml-auto mx-auto">
-                    WARNING: These products contain nicotine. Nicotine is an addictive chemical.
-                </p>
+                <p class="text-[10px] text-gray-600 border-l-2 md:border-l-0 md:border-r-2 border-gray-800 pl-4 md:pl-0 md:pr-4 leading-relaxed max-w-xs md:ml-auto mx-auto">WARNING: These products contain nicotine. Nicotine is an addictive chemical.</p>
             </div>
         </div>
     </footer>
