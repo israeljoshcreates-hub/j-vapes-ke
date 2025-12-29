@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@sanity/client'
 const client = createClient({
     projectId: '2aveaa71', 
     dataset: 'production',
-    useCdn: false, 
+    useCdn: false, // Set to FALSE for instant updates
     apiVersion: '2023-01-01'
 })
 
@@ -19,15 +19,8 @@ window.app = {
     },
 
     async fetchProducts() {
-        const query = `*[_type == "disposable"] {
-            _id,
-            name,
-            brand,
-            puffCount,
-            nicotine,
-            flavors,
-            price,
-            discount,
+        const query = `*[_type == "disposable"] | order(_createdAt desc) {
+            _id, name, brand, puffCount, nicotine, flavors, price, discount,
             "imageUrl": image.asset->url
         }`;
         
@@ -229,8 +222,43 @@ window.app = {
         this.updateCartUI();
     },
 
+    // --- GPS LOCATION FUNCTION ---
+    getGPS() {
+        const btn = document.getElementById('gps-btn');
+        const input = document.getElementById('delivery-location');
+        
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+
+        // Show loading spinner
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                // Success: Create Google Maps Link
+                const lat = position.coords.latitude;
+                const long = position.coords.longitude;
+                const mapLink = `https://www.google.com/maps?q=${lat},${long}`;
+                
+                input.value = mapLink; 
+                btn.innerHTML = '<i class="fa-solid fa-check text-green-500"></i>';
+                
+                // Reset button after 2 seconds
+                setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>'; }, 2000);
+            },
+            (error) => {
+                // Error
+                console.error(error);
+                alert("Could not get location. Please type it.");
+                btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-red-500"></i>';
+                setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>'; }, 2000);
+            }
+        );
+    },
+
     updateCartUI() {
-        // --- FIX IS HERE: SAVE FIRST! ---
         this.saveCart();
 
         const cartContainer = document.getElementById('cart-items');
@@ -254,7 +282,7 @@ window.app = {
         }
 
         cartContainer.innerHTML = this.cart.map(item => `
-            <div class="flex gap-4">
+            <div class="flex gap-4 mb-4">
                 <div class="w-16 h-16 bg-gray-100 flex-shrink-0">
                     <img src="${item.image}" class="w-full h-full object-cover">
                 </div>
@@ -276,6 +304,21 @@ window.app = {
                 </div>
             </div>
         `).join('');
+
+        // --- INJECT LOCATION BOX HERE ---
+        const locationInput = `
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <label class="text-[10px] font-bold uppercase text-gray-400 mb-1 block">Delivery Location:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="delivery-location" placeholder="Type location OR use button -->" 
+                           class="flex-1 bg-gray-100 border-none p-3 text-xs font-bold uppercase rounded focus:ring-1 focus:ring-black outline-none">
+                    <button id="gps-btn" onclick="window.app.getGPS()" class="bg-black text-white px-4 rounded hover:bg-gray-800 transition" title="Use Current Location">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        cartContainer.insertAdjacentHTML('beforeend', locationInput);
     },
 
     toggleCart() {
@@ -322,12 +365,22 @@ window.app = {
 
     checkout() {
         if (this.cart.length === 0) return;
+        
+        // --- GET LOCATION TEXT ---
+        const locationInput = document.getElementById('delivery-location');
+        const locationValue = locationInput ? locationInput.value : '';
+
         let message = `*NEW ORDER - J_VAPES.KE*\n\n`;
         this.cart.forEach(item => {
             message += `▫️ ${item.name}\n   Flavor: ${item.flavor}\n   Qty: ${item.qty} x ${item.price}\n\n`;
         });
         const total = this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        message += `*TOTAL ESTIMATE: KES ${total.toLocaleString()}*\n--------------------------\n📍 Location: \nDelivery is approx 100-400 KES depending on location.`;
+        message += `*TOTAL ESTIMATE: KES ${total.toLocaleString()}*\n--------------------------\n`;
+        
+        // --- ADD LOCATION TO MESSAGE ---
+        message += `📍 Location: ${locationValue ? locationValue : '(Not provided)'}`;
+        message += `\nDelivery fee depends on location.`;
+
         window.open(`https://wa.me/254741658556?text=${encodeURIComponent(message)}`, '_blank');
     }
 };
